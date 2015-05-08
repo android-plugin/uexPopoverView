@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<uexplugins>
+   <plugin
+        className="org.zywx.wbpalmstar.plugin.uexpopoverview.EUExPopoverView"
+        uexName="uexPopoverView" >
+        <method name="showPopover" />
+        <method name="hiddenPopover" />
+        <method name="setPopoverData"/>
+        <method name="close"/>
+    </plugin>
+</uexplugins>
