@@ -1,0 +1,121 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<link rel="stylesheet" type="text/css" href="css/index.css">
+	
+	<script type="text/javascript">
+	
+	window.uexOnload = function(){
+				
+			uexPopoverView.onItemClick = function(position) {
+			
+				switch(position) {
+					case 0:
+					 	alert('Group Chat');
+						break;
+					case 1:
+					 	alert('Add Contacts');
+						break;
+					case 2:
+					 	alert('Scan QR Code');
+						break;
+					case 3:
+					 	alert('Feedback');
+						break;
+				}
+			}
+	}
+	
+	function setData() {
+	
+		var data = {
+			id:0,
+			bgColor:'#ff000000',
+			dividerColor:'#ffffffff',
+			textColor:'#ffffffff',		
+			data:[
+	  			{
+	     			icon:'res://groupchat.png',
+	     			text:'Group Chat'
+	 			},
+	 			{
+	 				icon:'res://addcontacts.png',
+	     			text:'Add Contacts'
+	 			},
+	 			{
+	     			icon:'res://scanqrcode.png',
+	     			text:'Scan QR code'
+	 			},
+	 			{
+	 				icon:'res://feedback.png',
+	     			text:'Feedback'
+	 			}
+			]
+		};		
+		uexPopoverView.setPopoverData(JSON.stringify(data));
+		
+		var data2 = {
+			id:10,
+			bgColor:'#ff000000',
+			dividerColor:'#ffffffff',
+			textColor:'#ffffffff',		
+			data:[
+	  			{
+	     			icon:'res://groupchat.png',
+	     			text:'Group Chat'
+	 			},
+	 			{
+	 				icon:'res://addcontacts.png',
+	     			text:'Add Contacts'
+	 			}
+			]
+		};		
+		uexPopoverView.setPopoverData(JSON.stringify(data2));
+	}
+	
+	function show() {
+		var obj={
+				id:0,
+				x:200, 
+				y:50, 
+				w:300, 
+				h:400
+			};
+		uexPopoverView.showPopover(JSON.stringify(obj));
+		var obj2={
+				id:10,
+				x:200, 
+				y:480, 
+				w:300, 
+				h:200
+			};
+		uexPopoverView.showPopover(JSON.stringify(obj2));
+
+	}
+	
+	function dismiss() {
+		uexPopoverView.hiddenPopover("0");
+	}
+	
+	function clean() {
+		uexPopoverView.close("10");
+	}
+	
+</script>
+</head>
+
+<body>
+	<div class="tit">uexPopoverView</div>
+	<div class="conbor">
+		<div class="consj">
+		<input class="btn" type="button" value="setData" onclick=setData()>
+		<input class="btn" type="button" value="show" onclick=show()>
+		<input class="btn" type="button" value="dismiss" onclick=dismiss()>
+		<input class="btn" type="button" value="close" onclick=clean()>
+		</div>
+	</div>
+</body>
+</html>
