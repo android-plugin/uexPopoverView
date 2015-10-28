@@ -11,17 +11,12 @@ import org.json.JSONObject;
 import org.zywx.wbpalmstar.engine.EBrowserView;
 import org.zywx.wbpalmstar.engine.universalex.EUExBase;
 
-import android.app.Activity;
-import android.app.ActivityGroup;
-import android.app.LocalActivityManager;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Message;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.Window;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -30,7 +25,6 @@ import android.widget.RelativeLayout.LayoutParams;
 public class EUExPopoverView extends EUExBase implements Serializable {
 
 	private LayoutInflater inflater;
-	private LocalActivityManager mgr;
 
 	private ListView lv;
 	private String bgColor = null;
@@ -39,14 +33,13 @@ public class EUExPopoverView extends EUExBase implements Serializable {
 	private String textColor = null;
 	private DataAdapter adapter;
 	ArrayList<DataSource> data;
-	private Map<String, View> map_view;
+	private Map<String, EPopoverViewBaseView> map_view;
 	private Map<String, ArrayList<DataSource>> map_data;
 	
 	public EUExPopoverView(Context context, EBrowserView eBrowserView) {
 		super(context, eBrowserView);
-		mgr = ((ActivityGroup)mContext).getLocalActivityManager();
 		inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		map_view = new HashMap<String, View>();
+		map_view = new HashMap<String, EPopoverViewBaseView>();
 		map_data = new HashMap<String, ArrayList<DataSource>>();
 	}
 	
@@ -93,30 +86,28 @@ public class EUExPopoverView extends EUExBase implements Serializable {
 	
 	private void handleMessageInPopover(Message msg) {
 		String[] params = msg.getData().getStringArray(EPopoverViewUtils.POPOVERVIEW_KEY_CODE_FUNCTION);
-		String activityId = EUExPopoverView.this.hashCode() + params[0];
-		Activity activity = mgr.getActivity(activityId);
-		if(activity != null && activity instanceof EPopoverViewBaseActivity) {
-			EPopoverViewBaseActivity popoverViewBaseActivity = (EPopoverViewBaseActivity) activity;
-			switch (msg.what) {
-			case EPopoverViewUtils.POPOVERVIEW_MSG_CODE_DISMISS:
-				handleDismiss(params, popoverViewBaseActivity);
-				break;
-			case EPopoverViewUtils.POPOVERVIEW_MSG_CODE_CLOSE:
-				handleClose(params, popoverViewBaseActivity);
-				break;
-			}
-		}
+        if(params != null && params.length == 1){
+            String id = params[0];
+            if(map_view.containsKey(id)) {
+                EPopoverViewBaseView view = map_view.get(id);
+                if(view != null) {
+                    switch (msg.what) {
+                        case EPopoverViewUtils.POPOVERVIEW_MSG_CODE_DISMISS:
+                            handleDismiss(id);
+                            break;
+                        case EPopoverViewUtils.POPOVERVIEW_MSG_CODE_CLOSE:
+                            handleClose(id);
+                            break;
+                    }
+                }
+            }
+        }
+
 	}
 
-	private void handleDismiss(String[] params,
-			EPopoverViewBaseActivity popoverViewBaseActivity) {
-		if(params != null && params.length == 1){
-			String id = params[0];
-			if(map_view.containsKey(id)) {
-				removeViewFromCurrentWindow(map_view.get(id));
-				map_view.remove(id);
-			}
-		}
+	private void handleDismiss(String id) {
+        removeViewFromCurrentWindow(map_view.get(id));
+        map_view.remove(id);
 	}
 
 	private void handleSetPopoverData(Message msg) {
@@ -162,18 +153,12 @@ public class EUExPopoverView extends EUExBase implements Serializable {
 		}
 	}
 
-	private void handleClose(String[] params,
-			EPopoverViewBaseActivity popoverViewBaseActivity) {
-		if(params != null && params.length == 1){
-			String id = params[0];
-			if(map_view.containsKey(id)) {
-				removeViewFromCurrentWindow(map_view.get(id));
-				map_view.remove(id);
-			}
-			if(map_data.containsKey(id)) {
-				map_data.remove(id);
-			}
-		}
+	private void handleClose(String id) {
+        removeViewFromCurrentWindow(map_view.get(id));
+        map_view.remove(id);
+        if(map_data.containsKey(id)) {
+            map_data.remove(id);
+        }
 	}
 
 	private void handleShow(Message msg) {
@@ -181,36 +166,22 @@ public class EUExPopoverView extends EUExBase implements Serializable {
 		try {
 			JSONObject obj = new JSONObject(params[0]);
 			final String id = obj.getString(EPopoverViewUtils.POPOVERVIEW_PARAMS_JSON_KEY_ID);
-			final int x = Integer.parseInt(obj.getString(EPopoverViewUtils.POPOVERVIEW_PARAMS_JSON_KEY_X));
-			final int y = Integer.parseInt(obj.getString(EPopoverViewUtils.POPOVERVIEW_PARAMS_JSON_KEY_Y));
-			final int w = Integer.parseInt(obj.getString(EPopoverViewUtils.POPOVERVIEW_PARAMS_JSON_KEY_W));
-			final int h = Integer.parseInt(obj.getString(EPopoverViewUtils.POPOVERVIEW_PARAMS_JSON_KEY_H));
+			final double x = Double.parseDouble(obj.getString(EPopoverViewUtils.POPOVERVIEW_PARAMS_JSON_KEY_X));
+			final double y = Double.parseDouble(obj.getString(EPopoverViewUtils.POPOVERVIEW_PARAMS_JSON_KEY_Y));
+			final double w = Double.parseDouble(obj.getString(EPopoverViewUtils.POPOVERVIEW_PARAMS_JSON_KEY_W));
+			final double h = Double.parseDouble(obj.getString(EPopoverViewUtils.POPOVERVIEW_PARAMS_JSON_KEY_H));
 			if(map_view.containsKey(id) || !map_data.containsKey(id)) {
 				return;
 			}else {
 				data = map_data.get(id);
 			}
-			String activityId = EUExPopoverView.this.hashCode() + id;
-			EPopoverViewBaseActivity activity = (EPopoverViewBaseActivity) mgr.getActivity(activityId);
-			View decorView;
-			if(activity != null) {
-				 decorView = activity.getWindow().getDecorView();
-			}else {
-				Intent intent = new Intent(mContext, EPopoverViewBaseActivity.class);
-				intent.putExtra(EPopoverViewUtils.POPOVERVIEW_PARAMS_JSON_KEY_OBJ, this);
-				intent.putParcelableArrayListExtra(EPopoverViewUtils.POPOVERVIEW_PARAMS_JSON_KEY_DATA, data);
-				intent.putExtra(EPopoverViewUtils.POPOVERVIEW_PARAMS_JSON_KEY_BGCOLOR, bgColor);
-				intent.putExtra(EPopoverViewUtils.POPOVERVIEW_PARAMS_JSON_KEY_TEXTCOLOR, textColor);
-				intent.putExtra(EPopoverViewUtils.POPOVERVIEW_PARAMS_JSON_KEY_CLICKCOLOR, clickColor);
-				intent.putExtra(EPopoverViewUtils.POPOVERVIEW_PARAMS_JSON_KEY_ID, id);
-				Window window = mgr.startActivity(activityId, intent);
-				decorView = window.getDecorView();
-			}
+			EPopoverViewBaseView ePopoverViewBaseView = new EPopoverViewBaseView(mContext,
+                    this, bgColor, textColor, id, data);
 			LayoutParams param = new LayoutParams((int)w, (int)h);
 			param.leftMargin = (int)x;
 			param.topMargin = (int)y;
-			addView2CurrentWindow(decorView, param);
-			map_view.put(id, decorView);
+			addView2CurrentWindow(ePopoverViewBaseView, param);
+			map_view.put(id, ePopoverViewBaseView);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}

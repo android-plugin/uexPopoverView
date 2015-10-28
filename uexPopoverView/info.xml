@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <uexplugins>
-    <plugin uexName="uexPopoverView" version="3.0.1" build="1">
-        <info>1:更新适配机型使用的方法</info>
+    <plugin uexName="uexPopoverView" version="3.0.2" build="2">
+        <info>2:去掉插件中的ActivityGroup,配合引擎升级</info>
+        <build>1:更新适配机型使用的方法</build>
 		<build>0:气泡弹出窗</build>
     </plugin>
 </uexplugins>

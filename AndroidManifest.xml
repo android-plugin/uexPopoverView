@@ -47,7 +47,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-       <activity android:name="org.zywx.wbpalmstar.plugin.uexpopoverview.EPopoverViewBaseActivity" />
+       <activity android:name="org.zywx.wbpalmstar.plugin.uexpopoverview.EPopoverViewBaseView" />
     </application>
 
 </manifest>
